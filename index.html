@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grafik Surveilans Epidemiologi</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+</head>
+<body>
+    <h1>Grafik Surveilans Epidemiologi</h1>
+
+    <h2>Grafik Batang</h2>
+    <canvas id="barChart"></canvas>
+
+    <h2>Grafik Lingkaran (Pie Chart)</h2>
+    <canvas id="pieChart"></canvas>
+
+    <script>
+        fetch('data.php')
+            .then(response => response.json())
+            .then(data => {
+                const barLabels = data.bar.map(item => item.disease_name);
+                const barData = data.bar.map(item => item.patient_count);
+
+                const barChart = new Chart(document.getElementById('barChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: barLabels,
+                        datasets: [{
+                            label: 'Jumlah Penderita',
+                            data: barData,
+                            backgroundColor: ['#4CAF50', '#FF9800']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+
+                const pieLabels = data.bar.map(item => item.disease_name);
+                const pieData = data.bar.map(item => item.percentage);
+
+                const pieChart = new Chart(document.getElementById('pieChart'), {
+                    type: 'pie',
+                    data: {
+                        labels: pieLabels,
+                        datasets: [{
+                            data: pieData,
+                            backgroundColor: ['#4CAF50', '#FF9800']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        return `${label}: ${value.toFixed(2)}%`;
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                formatter: (value) => `${value.toFixed(2)}%`,
+                                color: '#fff',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    </script>
+</body>
+</html>
